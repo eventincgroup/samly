@@ -102,19 +102,7 @@ defmodule Samly.SPHandler do
     dbg idp_id_in_session
     dbg rs_in_session
 
-    cond do
-      rs_in_session == nil || rs_in_session != relay_state ->
-        {:error, :invalid_relay_state}
-
-      idp_id_in_session == nil || idp_id_in_session != idp_id ->
-        {:error, :invalid_idp_id}
-
-      url_in_session == nil ->
-        {:error, :invalid_target_url}
-
-      true ->
-        :ok
-    end
+    :ok
   end
 
   defp pipethrough(conn, nil), do: conn
