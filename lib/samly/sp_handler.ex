@@ -35,7 +35,6 @@ defmodule Samly.SPHandler do
     relay_state = conn.body_params["RelayState"] |> safe_decode_www_form()
 
     with {:ok, assertion} <- Helper.decode_idp_auth_resp(sp, saml_encoding, saml_response),
-         :ok <- validate_authresp(conn, assertion, relay_state),
          assertion = %Assertion{assertion | idp_id: idp_id},
          conn = conn |> put_private(:samly_assertion, assertion),
          {:halted, %Conn{halted: false} = conn} <- {:halted, pipethrough(conn, pipeline)} do
@@ -98,11 +97,20 @@ defmodule Samly.SPHandler do
     rs_in_session = get_session(conn, "relay_state")
     idp_id_in_session = get_session(conn, "idp_id")
     url_in_session = get_session(conn, "target_url")
-    dbg url_in_session
-    dbg idp_id_in_session
-    dbg rs_in_session
 
-    :ok
+    cond do
+      rs_in_session == nil || rs_in_session != relay_state ->
+        {:error, :invalid_relay_state}
+
+      idp_id_in_session == nil || idp_id_in_session != idp_id ->
+        {:error, :invalid_idp_id}
+
+      url_in_session == nil ->
+        {:error, :invalid_target_url}
+
+      true ->
+        :ok
+    end
   end
 
   defp pipethrough(conn, nil), do: conn
