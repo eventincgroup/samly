@@ -98,6 +98,9 @@ defmodule Samly.SPHandler do
     rs_in_session = get_session(conn, "relay_state")
     idp_id_in_session = get_session(conn, "idp_id")
     url_in_session = get_session(conn, "target_url")
+    dbg url_in_session
+    dbg idp_id_in_session
+    dbg rs_in_session
 
     cond do
       rs_in_session == nil || rs_in_session != relay_state ->
